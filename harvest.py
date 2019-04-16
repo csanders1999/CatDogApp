@@ -11,17 +11,10 @@ import json
 import twitter
 from functools import partial
 from sys import maxsize as maxint
-
+from credentials import *
 
 #Example 1
 def oauth_login():
-#Enter keys here
-    CONSUMER_KEY = ''
-    CONSUMER_SECRET = ''
-    OAUTH_TOKEN = ''
-    OAUTH_TOKEN_SECRET = ''
-    
-
     auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET,
                                CONSUMER_KEY, CONSUMER_SECRET)
 
