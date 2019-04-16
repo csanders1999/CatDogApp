@@ -1,9 +1,24 @@
 
 #To harvest tweets from a user to a list, type: user_tweets = harvest_user_timeline(twitter_api, user_id) or use screen_name
 #To harvest tweets from all users for personality analysis to a dictionary,-
-#-type: tweets = twitter_search(twitter_api, q, max_results=10) where q is the search term (dog)
+#-type: cat_tweets = get_cat_results(twitter_api) for cats and-
+#-dog_tweets = get_dog_results(twitter_api) for dogs
+
+#Sample test code:
+
+#from header import *
+#from harvest import *
+
+#twitter_api = oauth_login()
+#cat_tweets = get_cat_results(twitter_api)
+#print(json.dumps(cat_tweets, indent=1))
+#user_tweets = harvest_user_timeline(twitter_api, "caitsands")
+#print(json.dumps(user_tweets, indent=1))
+
 
 from header import *
+from collections import defaultdict
+
 
 #Example 21
 def harvest_user_timeline(twitter_api, screen_name=None, user_id=None, max_results=1000):
@@ -68,7 +83,19 @@ def harvest_user_timeline(twitter_api, screen_name=None, user_id=None, max_resul
 
     print('Done fetching tweets', file=sys.stderr)
 
-    return results[:max_results]
+    results = results[:max_results]
+
+    list_of_tweets = []
+
+    for result in results:
+        list_of_tweets.append(result["text"])
+
+    return list_of_tweets
+
+
+
+
+
 
 
 
@@ -112,4 +139,16 @@ def twitter_search(twitter_api, q, max_results=200, **kw):
         if len(statuses) > max_results:
             break
 
-    return statuses
+    user_to_tweet = {}
+
+    for status in statuses:
+        user_to_tweet[status["id_str"]] = status["text"]
+
+
+    return user_to_tweet
+
+def get_dog_results(twitter_api):
+        return twitter_search(twitter_api, "dog", max_results=10)
+
+def get_cat_results(twitter_api):
+        return twitter_search(twitter_api, "cat", max_results=10)
