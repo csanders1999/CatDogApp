@@ -148,7 +148,7 @@ def twitter_search(twitter_api, q, max_results=200, **kw):
     return user_to_tweet
 
 def get_dog_results(twitter_api):
-        return twitter_search(twitter_api, "dog", max_results=10)
+        return twitter_search(twitter_api, " dog ", max_results=10)
 
 def get_cat_results(twitter_api):
-        return twitter_search(twitter_api, "cat", max_results=10)
+        return twitter_search(twitter_api, " cat ", max_results=10)
