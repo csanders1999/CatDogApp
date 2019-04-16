@@ -4,28 +4,40 @@ import json
 import time
 import twitter
 import sys
+from credentials import *
+
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                             API Key Log-Ins                               ##
+##                                                                           ##
+###############################################################################
+###############################################################################
 
 # api keys for IBM's PersonalityInsightsV3
 def ibm_login():
     return PersonalityInsightsV3(
-        version='2017-10-13',
-        iam_apikey='-ACg3nD4EcO5CZ99ttHjKIrs-DBI6NZycDcc5xYaUAFY',
-        url='https://gateway.watsonplatform.net/personality-insights/api'
+        version=myVersion,
+        iam_apikey=myIam_apikey,
+        url=myUrl
     )
 
 # this function utilizes our keys to return a twitter_api item user later in all twitter system calls
 def oauth_login():
-
-    CONSUMER_KEY = 'mCnEXeDRkMrIcWVuaVINLoTqW'
-    CONSUMER_SECRET = 'BrK8OlrVBQlCJ1UJcfBQ6hyCcwpIi5QFLjyT1941Jymu32ass9'
-    OAUTH_TOKEN = '428623376-v54l4C89jqSz7V4p5Grf8cwxtA0RH6Sqw1qIvz9T'
-    OAUTH_TOKEN_SECRET = 'UsfHEy3bVXbueTduNn3sE9KfYxWDy94PXKShJcB3dcV80'
 
     auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET,
                                CONSUMER_KEY, CONSUMER_SECRET)
 
     twitter_api = twitter.Twitter(auth=auth)
     return twitter_api
+
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                 Functions borrowed from Twitter Cookbook                  ##
+##                                                                           ##
+###############################################################################
+###############################################################################
 
 def get_user_profile(twitter_api, screen_names=None, user_ids=None):
 
@@ -191,7 +203,15 @@ def make_twitter_request(twitter_api_func, max_errors=10, *args, **kw):
                 print("Too many consecutive errors...bailing out.", file=sys.stderr)
                 raise
 
-def convert_status_to_pi_content_item(s):
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                         Where the Magic Happens                           ##
+##                                                                           ##
+###############################################################################
+###############################################################################
+
+def reduce_status(s):
     # My code here
     return {
         'content': s['text'],
@@ -208,7 +228,7 @@ if __name__ == "__main__":
     newTweets = []
     tweets = harvest_user_timeline(twitter_api, screen_name="tysonowens", max_results=200)
     for i in tweets:
-        newTweets.append(convert_status_to_pi_content_item(i))
+        newTweets.append(reduce_status(i))
     tweets= {'contentItems': newTweets}
 
     with open('./profile.json', 'w') as fp:
