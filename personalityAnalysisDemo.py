@@ -211,10 +211,10 @@ if __name__ == "__main__":
         newTweets.append(convert_status_to_pi_content_item(i))
     tweets= {'contentItems': newTweets}
 
-    with open('./profile2.json', 'w') as fp:
+    with open('./profile.json', 'w') as fp:
         json.dump(tweets, fp, indent=2)
 
-    with open(join(dirname(__file__), './profile2.json')) as profile_json:
+    with open(join(dirname(__file__), './profile.json')) as profile_json:
         profile = personality_insights.profile(
             profile_json.read(),
             'application/json',
