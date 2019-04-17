@@ -1,0 +1,17 @@
+<div>
+  <p class='text' style='padding: 0px 20%'>
+    Write a desription of the project here... afjasl dflasdflasdk nf;lads nf;laslfi idfhoaisdfo ;ais;elfkslefl ;ashefl;se lfhslfhsl hflesghl hlhwe ghowghohweog iansgo aslkdn glnglsaj
+  </p>
+</div>
+<div>
+  <p class='text' style='margin-top: 20px'>
+    Enter a Twitter username to learn about them:
+  </p>
+  <input #username type='text' style='display: inline;'>
+  <button (click)="analyzeUser(username.value)" style='display: inline; margin: 10px'>
+    Go
+  </button>
+  <p *ngIf='showError' class='text' style='color: red; font-size: 8px; margin: 5px;'>
+    * Please enter a username
+  </p>
+</div>

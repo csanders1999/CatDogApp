@@ -1,0 +1,6 @@
+/* You can add global styles to this file, and also import other style files */
+.text {
+    font-weight: 300;
+    color: rgb(173, 173, 173);
+    margin: 10px
+}
