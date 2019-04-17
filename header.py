@@ -9,6 +9,10 @@ import twitter
 from functools import partial
 from sys import maxsize as maxint
 from credentials import *
+from ibm_watson import PersonalityInsightsV3
+from os.path import join, dirname
+import time
+import os
 
 ###############################################################################
 ###############################################################################

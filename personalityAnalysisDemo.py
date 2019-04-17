@@ -1,10 +1,3 @@
-from ibm_watson import PersonalityInsightsV3
-from os.path import join, dirname
-import json
-import time
-import twitter
-import sys
-from credentials import *
 from header import *
 
 ###############################################################################
@@ -96,3 +89,4 @@ if __name__ == "__main__":
     print('\nAverages found:')
     for r in research:
         print(r, ': ', research[r])
+    os.remove('./profile.json')
