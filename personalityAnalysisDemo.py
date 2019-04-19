@@ -66,10 +66,10 @@ if __name__ == "__main__":
     research_cat = research_dog.copy()
 
     # Classifying terms. Going to add more.
-    cat_names = [" cat ", " kitten ", " kitty ", " meow ", " feline "]
+    cat_names = [" cat ", " kitten ", " kitty ", " meow ", " feline ", " cats "]
     dog_names = [" dog ", " doggy ", " pupper ", " doggo ", \
                  " puppy ", " woof ", " borker ", " yapper ", \
-                 " hound ", " golden retriever ", " siberian husky ",]
+                 " hound ", " golden retriever ", " siberian husky ", " dogs "]
 
     MAXUSER = 1000
 
@@ -78,16 +78,16 @@ if __name__ == "__main__":
     for user in user_list:
         if max_users <= 0:
             break
-        print("Fetching more people...")
         if len(user_list) < MAXUSER:
+            print("Fetching more people...")
             friends_ids, followers_ids = get_friends_followers_ids(twitter_api,
                                                                    screen_name=user,
                                                                    friends_limit=50,
                                                                    followers_limit=50)
-            friends_ids = get_user_profile(twitter_api, user_ids=list(friends_ids))
-            for userID in friends_ids:
-                if friends_ids[userID]['screen_name'] not in user_list:
-                    user_list.append(friends_ids[userID]['screen_name'])
+            followers_ids = get_user_profile(twitter_api, user_ids=list(followers_ids))
+            for userID in followers_ids:
+                if followers_ids[userID]['screen_name'] not in user_list:
+                    user_list.append(followers_ids[userID]['screen_name'])
 
         print('Attempting to classify ', user)
         user_tweets = harvest_user_timeline(twitter_api, screen_name=user, max_results=200)
@@ -105,11 +105,11 @@ if __name__ == "__main__":
                 # and positive to final_dog_scores
                 break
             elif any(name in tweet.lower() for name in cat_names):
-                 # print("Cat: ",tweet)
+                 print("Cat: ",tweet)
                  blob = TextBlob(tweet)
                  final_cat_scores.append(blob.sentiment.polarity)
             elif any(name in tweet.lower() for name in dog_names):
-                # print("Dog: ",tweet)
+                print("Dog: ",tweet)
                 blob = TextBlob(tweet)
                 final_dog_scores.append(blob.sentiment.polarity)
 
@@ -140,25 +140,29 @@ if __name__ == "__main__":
         with open('./profile.json', 'w') as fp:
             json.dump(tweets, fp, indent=2)
 
-        with open(join(dirname(__file__), './profile.json')) as profile_json:
-            profile = personality_insights.profile(
-                profile_json.read(),
-                'application/json',
-                content_type='application/json',
-                consumption_preferences=True,
-                raw_scores=True
-            ).get_result()
+        try:
+            with open(join(dirname(__file__), './profile.json')) as profile_json:
+                profile = personality_insights.profile(
+                    profile_json.read(),
+                    'application/json',
+                    content_type='application/json',
+                    consumption_preferences=True,
+                    raw_scores=True
+                ).get_result()
 
-        research_dog['movie_romance'] += profile['consumption_preferences'][4]['consumption_preferences'][0]['score']
-        research_dog['movie_adventure'] += profile['consumption_preferences'][4]['consumption_preferences'][1]['score']
-        research_dog['movie_horror'] += profile['consumption_preferences'][4]['consumption_preferences'][2]['score']
-        research_dog['movie_musical'] += profile['consumption_preferences'][4]['consumption_preferences'][3]['score']
-        research_dog['movie_historical'] += profile['consumption_preferences'][4]['consumption_preferences'][4]['score']
-        research_dog['movie_scifi'] += profile['consumption_preferences'][4]['consumption_preferences'][5]['score']
-        research_dog['movie_war'] += profile['consumption_preferences'][4]['consumption_preferences'][6]['score']
-        research_dog['movie_drama'] += profile['consumption_preferences'][4]['consumption_preferences'][7]['score']
-        research_dog['movie_action'] += profile['consumption_preferences'][4]['consumption_preferences'][8]['score']
-        research_dog['movie_document'] += profile['consumption_preferences'][4]['consumption_preferences'][9]['score']
+
+            research_dog['movie_romance'] += profile['consumption_preferences'][4]['consumption_preferences'][0]['score']
+            research_dog['movie_adventure'] += profile['consumption_preferences'][4]['consumption_preferences'][1]['score']
+            research_dog['movie_horror'] += profile['consumption_preferences'][4]['consumption_preferences'][2]['score']
+            research_dog['movie_musical'] += profile['consumption_preferences'][4]['consumption_preferences'][3]['score']
+            research_dog['movie_historical'] += profile['consumption_preferences'][4]['consumption_preferences'][4]['score']
+            research_dog['movie_scifi'] += profile['consumption_preferences'][4]['consumption_preferences'][5]['score']
+            research_dog['movie_war'] += profile['consumption_preferences'][4]['consumption_preferences'][6]['score']
+            research_dog['movie_drama'] += profile['consumption_preferences'][4]['consumption_preferences'][7]['score']
+            research_dog['movie_action'] += profile['consumption_preferences'][4]['consumption_preferences'][8]['score']
+            research_dog['movie_document'] += profile['consumption_preferences'][4]['consumption_preferences'][9]['score']
+        except:
+            print("ERROR: ", user, " could not have sentiment analyzed")
 
 
     ################## TAKE AVERAGE SCORES FOR ALL CAT PEOPLE #################
@@ -174,25 +178,28 @@ if __name__ == "__main__":
         with open('./profile.json', 'w') as fp:
             json.dump(tweets, fp, indent=2)
 
-        with open(join(dirname(__file__), './profile.json')) as profile_json:
-            profile = personality_insights.profile(
-                profile_json.read(),
-                'application/json',
-                content_type='application/json',
-                consumption_preferences=True,
-                raw_scores=True
-            ).get_result()
+        try:
+            with open(join(dirname(__file__), './profile.json')) as profile_json:
+                profile = personality_insights.profile(
+                    profile_json.read(),
+                    'application/json',
+                    content_type='application/json',
+                    consumption_preferences=True,
+                    raw_scores=True
+                ).get_result()
 
-        research_cat['movie_romance'] += profile['consumption_preferences'][4]['consumption_preferences'][0]['score']
-        research_cat['movie_adventure'] += profile['consumption_preferences'][4]['consumption_preferences'][1]['score']
-        research_cat['movie_horror'] += profile['consumption_preferences'][4]['consumption_preferences'][2]['score']
-        research_cat['movie_musical'] += profile['consumption_preferences'][4]['consumption_preferences'][3]['score']
-        research_cat['movie_historical'] += profile['consumption_preferences'][4]['consumption_preferences'][4]['score']
-        research_cat['movie_scifi'] += profile['consumption_preferences'][4]['consumption_preferences'][5]['score']
-        research_cat['movie_war'] += profile['consumption_preferences'][4]['consumption_preferences'][6]['score']
-        research_cat['movie_drama'] += profile['consumption_preferences'][4]['consumption_preferences'][7]['score']
-        research_cat['movie_action'] += profile['consumption_preferences'][4]['consumption_preferences'][8]['score']
-        research_cat['movie_document'] += profile['consumption_preferences'][4]['consumption_preferences'][9]['score']
+            research_cat['movie_romance'] += profile['consumption_preferences'][4]['consumption_preferences'][0]['score']
+            research_cat['movie_adventure'] += profile['consumption_preferences'][4]['consumption_preferences'][1]['score']
+            research_cat['movie_horror'] += profile['consumption_preferences'][4]['consumption_preferences'][2]['score']
+            research_cat['movie_musical'] += profile['consumption_preferences'][4]['consumption_preferences'][3]['score']
+            research_cat['movie_historical'] += profile['consumption_preferences'][4]['consumption_preferences'][4]['score']
+            research_cat['movie_scifi'] += profile['consumption_preferences'][4]['consumption_preferences'][5]['score']
+            research_cat['movie_war'] += profile['consumption_preferences'][4]['consumption_preferences'][6]['score']
+            research_cat['movie_drama'] += profile['consumption_preferences'][4]['consumption_preferences'][7]['score']
+            research_cat['movie_action'] += profile['consumption_preferences'][4]['consumption_preferences'][8]['score']
+            research_cat['movie_document'] += profile['consumption_preferences'][4]['consumption_preferences'][9]['score']
+        except:
+            print("ERROR: ", user, " could not have sentiment analyzed (may be due to language)")
 
     ############# PRINT AVERAGES FOR BOTH DOG AND CAT PEOPLE ##################
 
