@@ -51,6 +51,61 @@ if __name__ == "__main__":
     cat_list = []
 
     research_dog = {
+        'big5_openness' : 0,
+        'adventurousness' : 0,
+        'art_interest' : 0,
+        'emotionality' : 0,
+        'imagination' : 0,
+        'intellect' : 0,
+        'auth_challenge' : 0,
+
+        'big5_conscientiousness' : 0,
+        'achieve_strive' : 0,
+        'cautiousness' : 0,
+        'dutifulness' : 0,
+        'orderliness' : 0,
+        'self_discip' : 0,
+        'self_effic' : 0,
+
+        'big5_extraversion' : 0,
+        'act_level' : 0,
+        'assertiveness' : 0,
+        'cheerfulness' : 0,
+        'excite_seek' : 0,
+        'outgoing' : 0,
+        'gregariousness' : 0,
+
+        'big5_agreeableness' : 0,
+        'altruism' : 0,
+        'coop' : 0,
+        'modesty' : 0,
+        'uncompromising' : 0,
+        'sympathy' : 0,
+        'trust' : 0,
+
+        'big5_emotional_range' : 0,
+        'fiery' : 0,
+        'worry_prone' : 0,
+        'melancholy' : 0,
+        'immoderation' : 0,
+        'self_consc' : 0,
+        'stress_prone' : 0,
+
+        'clothing_qual' : 0,
+        'clothing_style' : 0,
+        'clothing_comf' : 0,
+        'clothing_brand' : 0,
+        'clothing_ads' : 0,
+        'clothing_socmed' : 0,
+        'clothing_fam' : 0,
+        'clothing_spur' : 0,
+
+        'health_eat' : 0,
+        'health_gym' : 0,
+        'health_outdoor' : 0,
+
+        'enviro_care' : 0,
+
         'movie_romance' : 0,
         'movie_adventure' : 0,
         'movie_horror' : 0,
@@ -71,7 +126,7 @@ if __name__ == "__main__":
                  " puppy ", " woof ", " borker ", " yapper ", \
                  " hound ", " golden retriever ", " siberian husky ", " dogs "]
 
-    MAXUSER = 1000
+    MAXUSER = 200
 
     ############### CLASSIIFY USERS AS CAT OR DOG PERSON #####################
     max_users = MAXUSER
@@ -90,7 +145,7 @@ if __name__ == "__main__":
                     user_list.append(followers_ids[userID]['screen_name'])
 
         print('Attempting to classify ', user)
-        user_tweets = harvest_user_timeline(twitter_api, screen_name=user, max_results=200)
+        user_tweets = harvest_user_timeline(twitter_api, screen_name=user, max_results=400)
 
         # Lists of sentiment scores per each tweet
         final_cat_scores = []
@@ -105,13 +160,15 @@ if __name__ == "__main__":
                 # and positive to final_dog_scores
                 break
             elif any(name in tweet.lower() for name in cat_names):
-                 print("Cat: ",tweet)
+                 # print("Cat: ",tweet)
                  blob = TextBlob(tweet)
                  final_cat_scores.append(blob.sentiment.polarity)
+                 # print(blob.sentiment.polarity)
             elif any(name in tweet.lower() for name in dog_names):
-                print("Dog: ",tweet)
+                # print("Dog: ",tweet)
                 blob = TextBlob(tweet)
                 final_dog_scores.append(blob.sentiment.polarity)
+                # print(blob.sentiment.polarity)
 
         # Sum of sentiment scores for all tweets containing cat or dog classifiers
         cat_sa_score = sum(final_cat_scores)
@@ -132,7 +189,7 @@ if __name__ == "__main__":
     for user in dog_list:
         newTweets = []
         print('Fetching tweets of dog user: ', user)
-        tweets = harvest_user_timeline(twitter_api, screen_name=user, max_results=200)
+        tweets = harvest_user_timeline(twitter_api, screen_name=user, max_results=400)
         for i in tweets:
             newTweets.append(reduce_status(i))
         tweets= {'contentItems': newTweets}
@@ -150,6 +207,60 @@ if __name__ == "__main__":
                     raw_scores=True
                 ).get_result()
 
+            research_dog['big5_openness'] += profile['personality'][0]['raw_score']
+            research_dog['adventurousness'] += profile['personality'][0]['children'][0]['raw_score']
+            research_dog['art_interest'] += profile['personality'][0]['children'][1]['raw_score']
+            research_dog['emotionality'] += profile['personality'][0]['children'][2]['raw_score']
+            research_dog['imagination'] += profile['personality'][0]['children'][3]['raw_score']
+            research_dog['intellect'] += profile['personality'][0]['children'][4]['raw_score']
+            research_dog['auth_challenge'] += profile['personality'][0]['children'][5]['raw_score']
+
+            research_dog['big5_conscientiousness'] += profile['personality'][1]['raw_score']
+            research_dog['achieve_strive'] += profile['personality'][1]['children'][0]['raw_score']
+            research_dog['cautiousness'] += profile['personality'][1]['children'][1]['raw_score']
+            research_dog['dutifulness'] += profile['personality'][1]['children'][2]['raw_score']
+            research_dog['orderliness'] += profile['personality'][1]['children'][3]['raw_score']
+            research_dog['self_discip'] += profile['personality'][1]['children'][4]['raw_score']
+            research_dog['self_effic'] += profile['personality'][1]['children'][5]['raw_score']
+
+            research_dog['big5_extraversion'] += profile['personality'][2]['raw_score']
+            research_dog['act_level'] += profile['personality'][2]['children'][0]['raw_score']
+            research_dog['assertiveness'] += profile['personality'][2]['children'][1]['raw_score']
+            research_dog['cheerfulness'] += profile['personality'][2]['children'][2]['raw_score']
+            research_dog['excite_seek'] += profile['personality'][2]['children'][3]['raw_score']
+            research_dog['outgoing'] += profile['personality'][2]['children'][4]['raw_score']
+            research_dog['gregariousness'] += profile['personality'][2]['children'][5]['raw_score']
+
+            research_dog['big5_agreeableness'] += profile['personality'][3]['raw_score']
+            research_dog['altruism'] += profile['personality'][3]['children'][0]['raw_score']
+            research_dog['coop'] += profile['personality'][3]['children'][1]['raw_score']
+            research_dog['modesty'] += profile['personality'][3]['children'][2]['raw_score']
+            research_dog['uncompromising'] += profile['personality'][3]['children'][3]['raw_score']
+            research_dog['sympathy'] += profile['personality'][3]['children'][4]['raw_score']
+            research_dog['trust'] += profile['personality'][3]['children'][5]['raw_score']
+
+            research_dog['big5_emotional_range'] += profile['personality'][4]['raw_score']
+            research_dog['fiery'] += profile['personality'][4]['children'][0]['raw_score']
+            research_dog['worry_prone'] += profile['personality'][4]['children'][0]['raw_score']
+            research_dog['melancholy'] += profile['personality'][4]['children'][0]['raw_score']
+            research_dog['immoderation'] += profile['personality'][4]['children'][0]['raw_score']
+            research_dog['self_consc'] += profile['personality'][4]['children'][0]['raw_score']
+            research_dog['stress_prone'] += profile['personality'][4]['children'][0]['raw_score']
+
+            research_dog['clothing_qual'] += profile['consumption_preferences'][0]['consumption_preferences'][2]['score']
+            research_dog['clothing_style'] += profile['consumption_preferences'][0]['consumption_preferences'][3]['score']
+            research_dog['clothing_comf'] += profile['consumption_preferences'][0]['consumption_preferences'][4]['score']
+            research_dog['clothing_brand'] += profile['consumption_preferences'][0]['consumption_preferences'][5]['score']
+            research_dog['clothing_ads'] += profile['consumption_preferences'][0]['consumption_preferences'][7]['score']
+            research_dog['clothing_socmed'] += profile['consumption_preferences'][0]['consumption_preferences'][8]['score']
+            research_dog['clothing_fam'] += profile['consumption_preferences'][0]['consumption_preferences'][9]['score']
+            research_dog['clothing_spur'] += profile['consumption_preferences'][0]['consumption_preferences'][10]['score']
+
+            research_dog['health_eat'] += profile['consumption_preferences'][1]['consumption_preferences'][0]['score']
+            research_dog['health_gym'] += profile['consumption_preferences'][1]['consumption_preferences'][1]['score']
+            research_dog['health_outdoor'] += profile['consumption_preferences'][1]['consumption_preferences'][2]['score']
+
+            research_dog['enviro_care'] += profile['consumption_preferences'][2]['consumption_preferences'][0]['score']
 
             research_dog['movie_romance'] += profile['consumption_preferences'][4]['consumption_preferences'][0]['score']
             research_dog['movie_adventure'] += profile['consumption_preferences'][4]['consumption_preferences'][1]['score']
@@ -162,15 +273,14 @@ if __name__ == "__main__":
             research_dog['movie_action'] += profile['consumption_preferences'][4]['consumption_preferences'][8]['score']
             research_dog['movie_document'] += profile['consumption_preferences'][4]['consumption_preferences'][9]['score']
         except:
-            print("ERROR: ", user, " could not have sentiment analyzed")
-
+            print("ERROR: ", user, " could not have sentiment analyzed (may be due to language)")
 
     ################## TAKE AVERAGE SCORES FOR ALL CAT PEOPLE #################
 
     for user in cat_list:
         newTweets = []
         print('Fetching tweets of cat user: ', user)
-        tweets = harvest_user_timeline(twitter_api, screen_name=user, max_results=200)
+        tweets = harvest_user_timeline(twitter_api, screen_name=user, max_results=400)
         for i in tweets:
             newTweets.append(reduce_status(i))
         tweets= {'contentItems': newTweets}
@@ -187,6 +297,61 @@ if __name__ == "__main__":
                     consumption_preferences=True,
                     raw_scores=True
                 ).get_result()
+
+            research_cat['big5_openness'] += profile['personality'][0]['raw_score']
+            research_cat['adventurousness'] += profile['personality'][0]['children'][0]['raw_score']
+            research_cat['art_interest'] += profile['personality'][0]['children'][1]['raw_score']
+            research_cat['emotionality'] += profile['personality'][0]['children'][2]['raw_score']
+            research_cat['imagination'] += profile['personality'][0]['children'][3]['raw_score']
+            research_cat['intellect'] += profile['personality'][0]['children'][4]['raw_score']
+            research_cat['auth_challenge'] += profile['personality'][0]['children'][5]['raw_score']
+
+            research_cat['big5_conscientiousness'] += profile['personality'][1]['raw_score']
+            research_cat['achieve_strive'] += profile['personality'][1]['children'][0]['raw_score']
+            research_cat['cautiousness'] += profile['personality'][1]['children'][1]['raw_score']
+            research_cat['dutifulness'] += profile['personality'][1]['children'][2]['raw_score']
+            research_cat['orderliness'] += profile['personality'][1]['children'][3]['raw_score']
+            research_cat['self_discip'] += profile['personality'][1]['children'][4]['raw_score']
+            research_cat['self_effic'] += profile['personality'][1]['children'][5]['raw_score']
+
+            research_cat['big5_extraversion'] += profile['personality'][2]['raw_score']
+            research_cat['act_level'] += profile['personality'][2]['children'][0]['raw_score']
+            research_cat['assertiveness'] += profile['personality'][2]['children'][1]['raw_score']
+            research_cat['cheerfulness'] += profile['personality'][2]['children'][2]['raw_score']
+            research_cat['excite_seek'] += profile['personality'][2]['children'][3]['raw_score']
+            research_cat['outgoing'] += profile['personality'][2]['children'][4]['raw_score']
+            research_cat['gregariousness'] += profile['personality'][2]['children'][5]['raw_score']
+
+            research_cat['big5_agreeableness'] += profile['personality'][3]['raw_score']
+            research_cat['altruism'] += profile['personality'][3]['children'][0]['raw_score']
+            research_cat['coop'] += profile['personality'][3]['children'][1]['raw_score']
+            research_cat['modesty'] += profile['personality'][3]['children'][2]['raw_score']
+            research_cat['uncompromising'] += profile['personality'][3]['children'][3]['raw_score']
+            research_cat['sympathy'] += profile['personality'][3]['children'][4]['raw_score']
+            research_cat['trust'] += profile['personality'][3]['children'][5]['raw_score']
+
+            research_cat['big5_emotional_range'] += profile['personality'][4]['raw_score']
+            research_cat['fiery'] += profile['personality'][4]['children'][0]['raw_score']
+            research_cat['worry_prone'] += profile['personality'][4]['children'][0]['raw_score']
+            research_cat['melancholy'] += profile['personality'][4]['children'][0]['raw_score']
+            research_cat['immoderation'] += profile['personality'][4]['children'][0]['raw_score']
+            research_cat['self_consc'] += profile['personality'][4]['children'][0]['raw_score']
+            research_cat['stress_prone'] += profile['personality'][4]['children'][0]['raw_score']
+
+            research_cat['clothing_qual'] += profile['consumption_preferences'][0]['consumption_preferences'][2]['score']
+            research_cat['clothing_style'] += profile['consumption_preferences'][0]['consumption_preferences'][3]['score']
+            research_cat['clothing_comf'] += profile['consumption_preferences'][0]['consumption_preferences'][4]['score']
+            research_cat['clothing_brand'] += profile['consumption_preferences'][0]['consumption_preferences'][5]['score']
+            research_cat['clothing_ads'] += profile['consumption_preferences'][0]['consumption_preferences'][7]['score']
+            research_cat['clothing_socmed'] += profile['consumption_preferences'][0]['consumption_preferences'][8]['score']
+            research_cat['clothing_fam'] += profile['consumption_preferences'][0]['consumption_preferences'][9]['score']
+            research_cat['clothing_spur'] += profile['consumption_preferences'][0]['consumption_preferences'][10]['score']
+
+            research_cat['health_eat'] += profile['consumption_preferences'][1]['consumption_preferences'][0]['score']
+            research_cat['health_gym'] += profile['consumption_preferences'][1]['consumption_preferences'][1]['score']
+            research_cat['health_outdoor'] += profile['consumption_preferences'][1]['consumption_preferences'][2]['score']
+
+            research_cat['enviro_care'] += profile['consumption_preferences'][2]['consumption_preferences'][0]['score']
 
             research_cat['movie_romance'] += profile['consumption_preferences'][4]['consumption_preferences'][0]['score']
             research_cat['movie_adventure'] += profile['consumption_preferences'][4]['consumption_preferences'][1]['score']
@@ -202,11 +367,13 @@ if __name__ == "__main__":
             print("ERROR: ", user, " could not have sentiment analyzed (may be due to language)")
 
     ############# PRINT AVERAGES FOR BOTH DOG AND CAT PEOPLE ##################
-
-    for r in research_dog:
-        research_dog[r] = research_dog[r]/len(dog_list)
-    for r in research_cat:
-        research_cat[r] = research_cat[r]/len(cat_list)
+    try:
+        for r in research_dog:
+            research_dog[r] = research_dog[r]/len(dog_list)
+        for r in research_cat:
+            research_cat[r] = research_cat[r]/len(cat_list)
+    except:
+        print('Either dog or cat list is empty')
     print('\nAverages found for dog users:')
     for r in research_dog:
         print(r, ': ', research_dog[r])
