@@ -1,17 +1,21 @@
 #The following import statements and functions are taken from Mining-the-Social-Web-3rd-Edition Chapter 9 (Twitter Cookbook Examples 1, 16, 17, 19, and 22)
 
 import sys
+import csv
 import time
 from urllib.error import URLError
 from http.client import BadStatusLine
 import json
 import twitter
+import re
 from functools import partial
 from sys import maxsize as maxint
 from credentials import *
 from ibm_watson import PersonalityInsightsV3
 from os.path import join, dirname
 from textblob import TextBlob
+import numpy as np
+import matplotlib.pyplot as plt
 import time
 import os
 
