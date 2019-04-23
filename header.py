@@ -1,14 +1,31 @@
 #The following import statements and functions are taken from Mining-the-Social-Web-3rd-Edition Chapter 9 (Twitter Cookbook Examples 1, 16, 17, 19, and 22)
 
 import sys
+import csv
 import time
 from urllib.error import URLError
 from http.client import BadStatusLine
 import json
 import twitter
+import re
 from functools import partial
 from sys import maxsize as maxint
 from credentials import *
+from ibm_watson import PersonalityInsightsV3
+from os.path import join, dirname
+from textblob import TextBlob
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+import os
+
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                 Functions borrowed from Twitter Cookbook                  ##
+##                                                                           ##
+###############################################################################
+###############################################################################
 
 #Example 1
 def oauth_login():
@@ -90,3 +107,145 @@ def make_twitter_request(twitter_api_func, max_errors=10, *args, **kw):
             if error_count > max_errors:
                 print("Too many consecutive errors...bailing out.", file=sys.stderr)
                 raise
+
+def get_user_profile(twitter_api, screen_names=None, user_ids=None):
+
+    # Must have either screen_name or user_id (logical xor)
+    assert (screen_names != None) != (user_ids != None),     "Must have screen_names or user_ids, but not both"
+
+    items_to_info = {}
+
+    items = screen_names or user_ids
+
+    while len(items) > 0:
+
+        # Process 100 items at a time per the API specifications for /users/lookup.
+        # See http://bit.ly/2Gcjfzr for details.
+
+        items_str = ','.join([str(item) for item in items[:100]])
+        items = items[100:]
+
+        if screen_names:
+            response = make_twitter_request(twitter_api.users.lookup,
+                                            screen_name=items_str)
+        else: # user_ids
+            response = make_twitter_request(twitter_api.users.lookup,
+                                            user_id=items_str)
+
+        for user_info in response:
+            if screen_names:
+                items_to_info[user_info['screen_name']] = user_info
+            else: # user_ids
+                items_to_info[user_info['id']] = user_info
+
+    return items_to_info
+
+def harvest_user_timeline(twitter_api, screen_name=None, user_id=None, max_results=1000):
+
+    assert (screen_name != None) != (user_id != None),     "Must have screen_name or user_id, but not both"
+
+    kw = {  # Keyword args for the Twitter API call
+        'count': 200,
+        'trim_user': 'true',
+        'include_rts' : 'true',
+        'since_id' : 1
+        }
+
+    if screen_name:
+        kw['screen_name'] = screen_name
+    else:
+        kw['user_id'] = user_id
+
+    max_pages = 16
+    results = []
+
+    tweets = make_twitter_request(twitter_api.statuses.user_timeline, **kw)
+
+    if tweets is None: # 401 (Not Authorized) - Need to bail out on loop entry
+        tweets = []
+
+    results += tweets
+
+    print('Fetched {0} tweets'.format(len(tweets)), file=sys.stderr)
+
+    page_num = 1
+
+    # Many Twitter accounts have fewer than 200 tweets so you don't want to enter
+    # the loop and waste a precious request if max_results = 200.
+
+    # Note: Analogous optimizations could be applied inside the loop to try and
+    # save requests. e.g. Don't make a third request if you have 287 tweets out of
+    # a possible 400 tweets after your second request. Twitter does do some
+    # post-filtering on censored and deleted tweets out of batches of 'count', though,
+    # so you can't strictly check for the number of results being 200. You might get
+    # back 198, for example, and still have many more tweets to go. If you have the
+    # total number of tweets for an account (by GET /users/lookup/), then you could
+    # simply use this value as a guide.
+
+    if max_results == kw['count']:
+        page_num = max_pages # Prevent loop entry
+
+    while page_num < max_pages and len(tweets) > 0 and len(results) < max_results:
+
+        # Necessary for traversing the timeline in Twitter's v1.1 API:
+        # get the next query's max-id parameter to pass in.
+        # See https://dev.twitter.com/docs/working-with-timelines.
+        kw['max_id'] = min([ tweet['id'] for tweet in tweets]) - 1
+
+        tweets = make_twitter_request(twitter_api.statuses.user_timeline, **kw)
+        results += tweets
+
+        print('Fetched {0} tweets'.format(len(tweets)),file=sys.stderr)
+
+        page_num += 1
+
+    print('Done fetching tweets', file=sys.stderr)
+
+    return results[:max_results]
+
+def get_friends_followers_ids(twitter_api, screen_name=None, user_id=None,
+                              friends_limit=maxint, followers_limit=maxint):
+
+    # Must have either screen_name or user_id (logical xor)
+    assert (screen_name != None) != (user_id != None),     "Must have screen_name or user_id, but not both"
+
+    # See http://bit.ly/2GcjKJP and http://bit.ly/2rFz90N for details
+    # on API parameters
+
+    get_friends_ids = partial(make_twitter_request, twitter_api.friends.ids,
+                              count=5000)
+    get_followers_ids = partial(make_twitter_request, twitter_api.followers.ids,
+                                count=5000)
+
+    friends_ids, followers_ids = [], []
+
+    for twitter_api_func, limit, ids, label in [
+                    [get_friends_ids, friends_limit, friends_ids, "friends"],
+                    [get_followers_ids, followers_limit, followers_ids, "followers"]
+                ]:
+
+        if limit == 0: continue
+
+        cursor = -1
+        while cursor != 0:
+
+            # Use make_twitter_request via the partially bound callable...
+            if screen_name:
+                response = twitter_api_func(screen_name=screen_name, cursor=cursor)
+            else: # user_id
+                response = twitter_api_func(user_id=user_id, cursor=cursor)
+
+            if response is not None:
+                ids += response['ids']
+                cursor = response['next_cursor']
+
+            #print('Fetched {0} total {1} ids for {2}'.format(len(ids),                  label, (user_id or screen_name)),file=sys.stderr)
+
+            # XXX: You may want to store data during each iteration to provide an
+            # an additional layer of protection from exceptional circumstances
+
+            if len(ids) >= limit or response is None:
+                break
+
+    # Do something useful with the IDs, like store them to disk...
+    return friends_ids[:friends_limit], followers_ids[:followers_limit]
