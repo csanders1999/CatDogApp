@@ -3,9 +3,13 @@ from header import *
 from harvest import *
 
 twitter_api = oauth_login()
+visual_recognition = VisualRecognitionV3(myVersion, iam_apikey=myIam_apikey)
 
 def user_analysis(screen_name):
     user_tweets = harvest_user_timeline(twitter_api, screen_name)
+
+    dog_images = 0
+    cat_images = 0
 
     research_user = {
         'big5_openness' : 0,
@@ -88,7 +92,7 @@ def user_analysis(screen_name):
     num_dog_tweets = 0
 
     for tweet in user_tweets:
-        tweet = tweet['text']
+        #tweet = tweet['text']
         tweetSimple = tweet.lower()
         PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ _-"
         tweetSimple = "".join(c for c in tweetSimple if c in PERMITTED_CHARS)
@@ -112,6 +116,30 @@ def user_analysis(screen_name):
             blob = TextBlob(tweet)
             final_dog_scores.append(blob.sentiment.polarity)
             print(blob.sentiment.polarity)
+
+        for url in re.findall("(?P<url>https?://[^\s]+)", tweet):
+            # print(url)
+            # url = url.group("url") # grabs URL
+            print("Found URL, attempting to classify possible image...")
+            try:
+                classes_result = visual_recognition.classify(url=url).get_result() # classifies image
+
+                # Gets json data
+                classify_data = json.dumps(classes_result["images"][0]["classifiers"][0]["classes"], indent=2)
+
+                # Going through every dictionary in list of json date
+                for dict in json.loads(classify_data):
+                    for key, value in dict.items():
+                        if value == 'dog':
+                            dog_images += 1
+                            print("URL was a DOG image")
+                            break # won't account for both dog or cat (whichever is bigger)
+                        if value == 'cat':
+                            cat_images += 1
+                            print("URL was a CAT image")
+                            break # won't account for both dog or cat (whichever is bigger)
+            except:
+                print("Not a valid image URL")
 
     # Sum of sentiment scores for all tweets containing cat or dog classifiers
     cat_sa_score = sum(final_cat_scores)
@@ -208,4 +236,4 @@ def user_analysis(screen_name):
     except:
         print("ERROR")
 
-    return ((cat_sa_score, num_cat_tweets), (dog_sa_score, num_dog_tweets), research_user)
+    return ((cat_sa_score, num_cat_tweets, cat_images), (dog_sa_score, num_dog_tweets, dog_images), research_user)
