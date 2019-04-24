@@ -45,7 +45,7 @@ if __name__ == "__main__":
     twitter_api = oauth_login()
     personality_insights = ibm_login()
 
-    user_list = ['TysonOwens']
+    user_list = ['TysonOwens', 'caitsands']
     dog_list = []
     cat_list = []
 
@@ -120,12 +120,12 @@ if __name__ == "__main__":
     research_cat = research_dog.copy()
 
     # Classifying terms. Going to add more.
-    cat_names = [" cat ", " kitten ", " kitty ", " meow ", " feline ", " cats "]
-    dog_names = [" dog ", " doggy ", " pupper ", " doggo ", \
-                 " puppy ", " woof ", " borker ", " yapper ", \
-                 " hound ", " golden retriever ", " siberian husky ", " dogs "]
+    cat_names = ["cat", "kitten", "kitty", "meow", "feline", "cats"]
+    dog_names = ["dog", "doggy", "pupper", "doggo", \
+                 "puppy", "woof", "borker", "yapper", \
+                 "hound", "retriever", "husky", "dogs"]
 
-    MAXUSER = 10
+    MAXUSER = 4000
 
     ############### CLASSIIFY USERS AS CAT OR DOG PERSON #####################
     max_users = MAXUSER
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         if max_users <= 0:
             break
         if len(user_list) < MAXUSER:
-            print("Fetching more people...")
+            print("Fetching more people...   [", len(user_list), "/", MAXUSER, "]")
             friends_ids, followers_ids = get_friends_followers_ids(twitter_api,
                                                                    screen_name=user,
                                                                    friends_limit=50,
@@ -151,24 +151,27 @@ if __name__ == "__main__":
         final_dog_scores = []
         for tweet in user_tweets:
             tweet = tweet['text']
-            tweetSimple = re.sub('[,.!@#$]/{}-_=+^%()', ' ', tweet)
-            if any(name in tweetSimple.lower() for name in cat_names) and \
-               any(name in tweetSimple.lower() for name in dog_names):
+            tweetSimple = tweet.lower()
+            PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ _-"
+            tweetSimple = "".join(c for c in tweetSimple if c in PERMITTED_CHARS)
+            tweetSimple = tweetSimple.split()
+            if any(name in tweetSimple for name in cat_names) and \
+               any(name in tweetSimple for name in dog_names):
                 # Need to add way to parse sentance if contains both cat
                 # and dog classifiers (i.e. "I hate cats but I love dogs")
                 # should add a negative sentiment score to final_cat_scores
                 # and positive to final_dog_scores
                 break
-            elif any(name in tweetSimple.lower() for name in cat_names):
-                 # print("Cat: ",tweet)
+            elif any(name in tweetSimple for name in cat_names):
+                 print("Cat: ",tweet)
                  blob = TextBlob(tweet)
                  final_cat_scores.append(blob.sentiment.polarity)
-                 # print(blob.sentiment.polarity)
-            elif any(name in tweetSimple.lower() for name in dog_names):
-                # print("Dog: ",tweet)
+                 print(blob.sentiment.polarity)
+            elif any(name in tweetSimple for name in dog_names):
+                print("Dog: ",tweet)
                 blob = TextBlob(tweet)
                 final_dog_scores.append(blob.sentiment.polarity)
-                # print(blob.sentiment.polarity)
+                print(blob.sentiment.polarity)
 
         # Sum of sentiment scores for all tweets containing cat or dog classifiers
         cat_sa_score = sum(final_cat_scores)
