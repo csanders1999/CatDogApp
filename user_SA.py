@@ -32,24 +32,15 @@ def user_analysis(screen_name):
             # should add a negative sentiment score to final_cat_scores
             # and positive to final_dog_scores
             break
-<<<<<<< HEAD
-        elif any(name in tweet.lower() for name in cat_names):
-             # Testing: print("Cat: ",tweet)
-             num_cat_tweets += 1
-             blob = TextBlob(tweet)
-             final_cat_scores.append(blob.sentiment.polarity)
-        elif any(name in tweet.lower() for name in dog_names):
-            # Testing: print("Dog: ",tweet)
-            num_dog_tweets += 1
-=======
         elif any(name in tweetSimple for name in cat_names):
              print("Cat: ",tweet)
+             num_cat_tweets += 1
              blob = TextBlob(tweet)
              final_cat_scores.append(blob.sentiment.polarity)
              print(blob.sentiment.polarity)
         elif any(name in tweetSimple for name in dog_names):
             print("Dog: ",tweet)
->>>>>>> c211747566f434ecb88a4817d33dcaa09c128dc7
+            num_dog_tweets += 1
             blob = TextBlob(tweet)
             final_dog_scores.append(blob.sentiment.polarity)
             print(blob.sentiment.polarity)
