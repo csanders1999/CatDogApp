@@ -9,7 +9,21 @@ myString = 'This is Beaux. He would like to box, but only if you go easy on him.
 url = re.search("(?P<url>https?://[^\s]+)", myString).group("url")
 
 classes_result = visual_recognition.classify(url=url).get_result()
-print(json.dumps(classes_result, indent=2))
+data = json.dumps(classes_result["images"][0]["classifiers"][0]["classes"], indent=2)
+list = json.loads(data)
+dog_images = 0
+cat_images = 0
+for dict in list:
+    for key, value in dict.items():
+        if value == 'dog':
+            dog_images += 1
+            break # won't account for both dog or cat (whichever is bigger)
+        if value == 'cat':
+            cat_images += 1
+            break
+
+print(dog_images)
+print(cat_images)
 
 # check image urls of tweets
 # if we just find dog, return dog
