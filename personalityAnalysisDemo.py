@@ -1,5 +1,4 @@
 from header import *
-
 ###############################################################################
 ###############################################################################
 ##                                                                           ##
@@ -46,7 +45,7 @@ if __name__ == "__main__":
     twitter_api = oauth_login()
     personality_insights = ibm_login()
 
-    user_list = ['TysonOwens']
+    user_list = ['TysonOwens', 'caitsands']
     dog_list = []
     cat_list = []
 
@@ -121,12 +120,12 @@ if __name__ == "__main__":
     research_cat = research_dog.copy()
 
     # Classifying terms. Going to add more.
-    cat_names = [" cat ", " kitten ", " kitty ", " meow ", " feline ", " cats "]
-    dog_names = [" dog ", " doggy ", " pupper ", " doggo ", \
-                 " puppy ", " woof ", " borker ", " yapper ", \
-                 " hound ", " golden retriever ", " siberian husky ", " dogs "]
+    cat_names = ["cat", "kitten", "kitty", "meow", "feline", "cats"]
+    dog_names = ["dog", "doggy", "pupper", "doggo", \
+                 "puppy", "woof", "borker", "yapper", \
+                 "hound", "retriever", "husky", "dogs"]
 
-    MAXUSER = 200
+    MAXUSER = 40
 
     ############### CLASSIIFY USERS AS CAT OR DOG PERSON #####################
     max_users = MAXUSER
@@ -134,7 +133,7 @@ if __name__ == "__main__":
         if max_users <= 0:
             break
         if len(user_list) < MAXUSER:
-            print("Fetching more people...")
+            print("Fetching more people...   [", len(user_list), "/", MAXUSER, "]")
             friends_ids, followers_ids = get_friends_followers_ids(twitter_api,
                                                                    screen_name=user,
                                                                    friends_limit=50,
@@ -152,23 +151,27 @@ if __name__ == "__main__":
         final_dog_scores = []
         for tweet in user_tweets:
             tweet = tweet['text']
-            if any(name in tweet.lower() for name in cat_names) and \
-               any(name in tweet.lower() for name in dog_names):
+            tweetSimple = tweet.lower()
+            PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ _-"
+            tweetSimple = "".join(c for c in tweetSimple if c in PERMITTED_CHARS)
+            tweetSimple = tweetSimple.split()
+            if any(name in tweetSimple for name in cat_names) and \
+               any(name in tweetSimple for name in dog_names):
                 # Need to add way to parse sentance if contains both cat
                 # and dog classifiers (i.e. "I hate cats but I love dogs")
                 # should add a negative sentiment score to final_cat_scores
                 # and positive to final_dog_scores
                 break
-            elif any(name in tweet.lower() for name in cat_names):
-                 # print("Cat: ",tweet)
+            elif any(name in tweetSimple for name in cat_names):
+                 print("Cat: ",tweet)
                  blob = TextBlob(tweet)
                  final_cat_scores.append(blob.sentiment.polarity)
-                 # print(blob.sentiment.polarity)
-            elif any(name in tweet.lower() for name in dog_names):
-                # print("Dog: ",tweet)
+                 print(blob.sentiment.polarity)
+            elif any(name in tweetSimple for name in dog_names):
+                print("Dog: ",tweet)
                 blob = TextBlob(tweet)
                 final_dog_scores.append(blob.sentiment.polarity)
-                # print(blob.sentiment.polarity)
+                print(blob.sentiment.polarity)
 
         # Sum of sentiment scores for all tweets containing cat or dog classifiers
         cat_sa_score = sum(final_cat_scores)
@@ -374,6 +377,153 @@ if __name__ == "__main__":
             research_cat[r] = research_cat[r]/len(cat_list)
     except:
         print('Either dog or cat list is empty')
+
+    # create csv file with all data
+    with open('./research/research_data.csv', mode='w') as employee_file:
+        data_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        data_writer.writerow(['Attribute', 'Dog', 'Cat'])
+        for r in research_dog:
+            data_writer.writerow([r, research_dog[r], research_cat[r]])
+
+    # create a graph for big5
+    plt.rcParams.update({'font.size': 8})
+    N = 5
+    dogAvgs = (research_dog['big5_openness'],research_dog['big5_extraversion'],research_dog['big5_agreeableness'],research_dog['big5_emotional_range'],research_dog['big5_conscientiousness'])
+    catAvgs = (research_cat['big5_openness'],research_cat['big5_extraversion'],research_cat['big5_agreeableness'],research_cat['big5_emotional_range'],research_cat['big5_conscientiousness'])
+    ind = np.arange(N)
+    width = 0.20
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, dogAvgs, width, color='royalblue')
+    rects2 = ax.bar(ind+width, catAvgs, width, color='y')
+    ax.set_title('Big5 on Cats vs Dogs')
+    ax.set_xticks(ind+width/2)
+    ax.set_xticklabels(('Openness', 'Extravesion', 'Agreeableness', 'Emotional\nRange', 'Conscientiousness'))
+    ax.legend((rects1[0], rects2[0]), ('Dog', 'Cat'))
+    ax.autoscale_view()
+    plt.savefig('./research/big5_graph.png')
+
+    # create a graph for big5_openness
+    N = 6
+    dogAvgs = (research_dog['adventurousness'],research_dog['art_interest'],research_dog['emotionality'],research_dog['imagination'],research_dog['intellect'],research_dog['auth_challenge'])
+    catAvgs = (research_cat['adventurousness'],research_cat['art_interest'],research_cat['emotionality'],research_cat['imagination'],research_cat['intellect'],research_cat['auth_challenge'])
+    ind = np.arange(N)
+    width = 0.20
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, dogAvgs, width, color='royalblue')
+    rects2 = ax.bar(ind+width, catAvgs, width, color='y')
+    ax.set_title('Openness on Cats vs Dogs')
+    ax.set_xticks(ind+width/2)
+    ax.set_xticklabels(('Adventurousness', 'Artistic\nInterest', 'Emotionality', 'imagination', 'Intellect','Authority \nChallenging'))
+    ax.legend((rects1[0], rects2[0]), ('Dog', 'Cat'))
+    ax.autoscale_view()
+    plt.savefig('./research/big5_openness_graph.png')
+
+    # create a graph for big5_conscientiousness
+    N = 6
+    dogAvgs = (research_dog['achieve_strive'],research_dog['cautiousness'],research_dog['dutifulness'],research_dog['orderliness'],research_dog['self_discip'],research_dog['self_effic'])
+    catAvgs = (research_cat['achieve_strive'],research_cat['cautiousness'],research_cat['dutifulness'],research_cat['orderliness'],research_cat['self_discip'],research_cat['self_effic'])
+    ind = np.arange(N)
+    width = 0.20
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, dogAvgs, width, color='royalblue')
+    rects2 = ax.bar(ind+width, catAvgs, width, color='y')
+    ax.set_title('Conscientiousness on Cats vs Dogs')
+    ax.set_xticks(ind+width/2)
+    ax.set_xticklabels(('Achievement\nStriving', 'Cautiousness', 'Dutifulness', 'Orderliness', 'Self-\nDiscipline','Self-\nEfficacy'))
+    ax.legend((rects1[0], rects2[0]), ('Dog', 'Cat'))
+    ax.autoscale_view()
+    plt.savefig('./research/big5_conscientiousness_graph.png')
+
+    # create a graph for big5_extraversion
+    N = 6
+    dogAvgs = (research_dog['act_level'],research_dog['assertiveness'],research_dog['cheerfulness'],research_dog['excite_seek'],research_dog['outgoing'],research_dog['gregariousness'])
+    catAvgs = (research_cat['act_level'],research_cat['assertiveness'],research_cat['cheerfulness'],research_cat['excite_seek'],research_cat['outgoing'],research_cat['gregariousness'])
+    ind = np.arange(N)
+    width = 0.20
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, dogAvgs, width, color='royalblue')
+    rects2 = ax.bar(ind+width, catAvgs, width, color='y')
+    ax.set_title('Extravesion on Cats vs Dogs')
+    ax.set_xticks(ind+width/2)
+    ax.set_xticklabels(('Activity\nLevel', 'Assertiveness', 'Cheerfulness', 'Excitement\nSeeking', 'Outgoing','Gregariousness'))
+    ax.legend((rects1[0], rects2[0]), ('Dog', 'Cat'))
+    ax.autoscale_view()
+    plt.savefig('./research/big5_extraversion_graph.png')
+
+    # create a graph for big5_agreeableness
+    N = 6
+    dogAvgs = (research_dog['altruism'],research_dog['coop'],research_dog['modesty'],research_dog['uncompromising'],research_dog['sympathy'],research_dog['trust'])
+    catAvgs = (research_cat['altruism'],research_cat['coop'],research_cat['modesty'],research_cat['uncompromising'],research_cat['sympathy'],research_cat['trust'])
+    ind = np.arange(N)
+    width = 0.20
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, dogAvgs, width, color='royalblue')
+    rects2 = ax.bar(ind+width, catAvgs, width, color='y')
+    ax.set_title('Agreeableness on Cats vs Dogs')
+    ax.set_xticks(ind+width/2)
+    ax.set_xticklabels(('Altruism', 'Co-operation', 'Modesty', 'Uncompromising', 'Sympathy','Trust'))
+    ax.legend((rects1[0], rects2[0]), ('Dog', 'Cat'))
+    ax.autoscale_view()
+    plt.savefig('./research/big5_agreeableness_graph.png')
+
+    # create a graph for big5_emotional_range
+    N = 6
+    dogAvgs = (research_dog['fiery'],research_dog['worry_prone'],research_dog['melancholy'],research_dog['immoderation'],research_dog['self_consc'],research_dog['stress_prone'])
+    catAvgs = (research_cat['fiery'],research_cat['worry_prone'],research_cat['melancholy'],research_cat['immoderation'],research_cat['self_consc'],research_cat['stress_prone'])
+    ind = np.arange(N)
+    width = 0.20
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, dogAvgs, width, color='royalblue')
+    rects2 = ax.bar(ind+width, catAvgs, width, color='y')
+    ax.set_title('Emotional Range on Cats vs Dogs')
+    ax.set_xticks(ind+width/2)
+    ax.set_xticklabels(('Fiery', 'Worry\nProne', 'Melancholy', 'Immoderation', 'Self-\nConsciousness','Stress\nProne'))
+    ax.legend((rects1[0], rects2[0]), ('Dog', 'Cat'))
+    ax.autoscale_view()
+    plt.savefig('./research/big5_emotional_range_graph.png')
+
+    # create a graph for health
+    N = 3
+    dogAvgs = (research_dog['health_eat'],research_dog['health_gym'],research_dog['health_outdoor'])
+    catAvgs = (research_cat['health_eat'],research_cat['health_gym'],research_cat['health_outdoor'])
+    ind = np.arange(N)
+    width = 0.20
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, dogAvgs, width, color='royalblue')
+    rects2 = ax.bar(ind+width, catAvgs, width, color='y')
+    ax.set_title('Health on Cats vs Dogs')
+    ax.set_xticks(ind+width/2)
+    ax.set_xticklabels(('Eat Out', 'Gym\nMember', 'Like Outdoor\nActivities'))
+    ax.legend((rects1[0], rects2[0]), ('Dog', 'Cat'))
+    ax.autoscale_view()
+    plt.savefig('./research/big5_health_graph.png')
+
+    # create a graph for big5_shopping
+    plt.rcParams.update({'font.size': 6})
+    N = 8
+    dogAvgs = (research_dog['clothing_ads'],research_dog['clothing_fam'],research_dog['clothing_comf'],research_dog['clothing_qual'],research_dog['clothing_spur'],research_dog['clothing_brand'],research_dog['clothing_style'],research_dog['clothing_socmed'])
+    catAvgs = (research_cat['clothing_ads'],research_cat['clothing_fam'],research_cat['clothing_comf'],research_cat['clothing_qual'],research_cat['clothing_spur'],research_cat['clothing_brand'],research_dog['clothing_style'],research_dog['clothing_socmed'])
+    ind = np.arange(N)
+    width = 0.20
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, dogAvgs, width, color='royalblue')
+    rects2 = ax.bar(ind+width, catAvgs, width, color='y')
+    ax.set_title('Shopping on Cats vs Dogs')
+    ax.set_xticks(ind+width/2)
+    ax.set_xticklabels(('Influenced\nby Online Ads', 'Influenced\nby Family', 'Prefer Comfy\nClothing', 'Prefer Qual.\nClothing', 'Likely to\nSpur Shop','Influenced\nby Brand','Prefer Stylish\nClothing','Influenced\nby Soc. Med.'))
+    ax.legend((rects1[0], rects2[0]), ('Dog', 'Cat'))
+    ax.autoscale_view()
+    plt.savefig('./research/big5_shopping_graph.png')
+
+    # print averages for both dogs and cats
     print('\nAverages found for dog users:')
     for r in research_dog:
         print(r, ': ', research_dog[r])
