@@ -152,3 +152,33 @@ def get_dog_results(twitter_api):
 
 def get_cat_results(twitter_api):
         return twitter_search(twitter_api, " cat ", max_results=10)
+
+
+
+
+def get_user_profile_image(twitter_api, screen_name=None, user_id=None):
+
+    # Must have either screen_name or user_id (logical xor)
+    assert (screen_name != None) != (user_id != None), \
+    "Must have screen_names or user_ids, but not both"
+
+    items_to_info = {}
+
+    item = screen_name or user_id
+
+    if screen_name:
+        response = make_twitter_request(twitter_api.users.lookup,
+                                        screen_name=item)
+    else: # user_id
+        response = make_twitter_request(twitter_api.users.lookup,
+                                        user_id=item)
+
+    for user_info in response:
+        if screen_name:
+            items_to_info[user_info['screen_name']] = user_info
+        else: # user_id
+            items_to_info[user_info['id']] = user_info
+
+    url = items_to_info[list(items_to_info.keys())[0]]["profile_image_url"]
+
+    return url
