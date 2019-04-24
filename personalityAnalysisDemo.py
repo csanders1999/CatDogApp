@@ -125,7 +125,7 @@ if __name__ == "__main__":
                  "puppy", "woof", "borker", "yapper", \
                  "hound", "retriever", "husky", "dogs"]
 
-    MAXUSER = 4000
+    MAXUSER = 40
 
     ############### CLASSIIFY USERS AS CAT OR DOG PERSON #####################
     max_users = MAXUSER
