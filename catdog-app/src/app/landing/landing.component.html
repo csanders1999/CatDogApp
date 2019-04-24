@@ -1,17 +1,22 @@
-<div>
-  <p class='text' style='padding: 0px 20%'>
-    Write a desription of the project here... afjasl dflasdflasdk nf;lads nf;laslfi idfhoaisdfo ;ais;elfkslefl ;ashefl;se lfhslfhsl hflesghl hlhwe ghowghohweog iansgo aslkdn glnglsaj
-  </p>
-</div>
-<div>
-  <p class='text' style='margin-top: 20px'>
+<div class='container'>
+  <div class='row'>
+    <p class='text' style='padding: 0px 50px'>
+      Our data mining term project is to use several methods to determine if a given user is a dog person or a cat person. We also seek to uncover the general differences in personality between the two classifications. Methods used in determining class include sentiment analysis on tweets containing keywords pertaining to cats or dogs, overall personality analysis of a user's tweets, and image analysis to see if the user posts images of cats or dogs.
+    </p>
+  </div>
+  <p class='text'>
     Enter a Twitter username to learn about them:
   </p>
-  <input #username type='text' style='display: inline;'>
-  <button (click)="analyzeUser(username.value)" style='display: inline; margin: 10px'>
-    Go
-  </button>
-  <p *ngIf='showError' class='text' style='color: red; font-size: 8px; margin: 5px;'>
-    * Please enter a username
-  </p>
+  <div class='row' style='display: initial !important'>
+    <input #username type='text'>
+    <button (click)="analyzeUser(username.value)" style='margin: 10px'>
+      Go
+    </button>
+  </div>
+  <div class='row' style='display: initial !important'>
+    <p *ngIf='showError' class='text' style='color: red; font-size: 8px; margin: 5px;'>
+      * Please enter a username
+    </p>
+    <img *ngIf='loading' src='../../assets/tsconfig.gif' height="50" width="50">
+  </div>
 </div>

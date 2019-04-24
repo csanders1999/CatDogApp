@@ -1,3 +1,13 @@
-<p>
-  results works!
-</p>
+<div class='container-fluid'>
+  <div class='row' style='display: initial !important; text-align: center;'>
+    <h4>Analysis for {{analysis.username}}</h4>
+  </div>
+  <div class='row'>
+    <div class='col'>
+      Out of {{analysis.dog_num}} tweets about dogs, the total sentiment polarity is {{analysis.dog_sa_score}}
+    </div>
+    <div class='col'>
+        Out of {{analysis.cat_num}} tweets about cats, the total sentiment polarity is {{analysis.cat_sa_score}}
+      </div>
+  </div>
+</div>

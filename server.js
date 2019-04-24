@@ -38,16 +38,18 @@ app
       pyshell.stdout.on('data', function(data){
         dataString += data;
       });
-      // Allow the script to end
+      // Allow the script to end and send back dictionary of analysis
       pyshell.end(function(err, code, signal) {
         if (err) throw err;
+
+        // Get the object that we want from all python output
+        res.set('Content-Type', 'application/json');
+        dataString = dataString.slice(dataString.indexOf('***')+3, dataString.lastIndexOf('***'))
+        res.send(dataString)
+
         console.log('The exit code was: ' + code);
         console.log('finished');
       });
-      
-      // Send back dictionary of analysis, allowing time for script to run
-      res.set('Content-Type', 'application/json');
-      setTimeout(() => res.send(dataString), 500)
     })
     // Default route
     .use(function(req, res) {

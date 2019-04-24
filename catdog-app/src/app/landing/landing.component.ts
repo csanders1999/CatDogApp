@@ -11,6 +11,7 @@ export class LandingComponent implements OnInit {
   constructor(private router: Router, private http: HttpService) { }
 
   showError: boolean = false // Flag for showing empty field error
+  loading: boolean = false // Flag for showing loading gif
 
   ngOnInit() {
   }
@@ -23,6 +24,7 @@ export class LandingComponent implements OnInit {
       this.showError = true;
     }
     else {
+      this.loading = true
       this.showError = false
       this.http.postUsername(username)
         .subscribe(response => {

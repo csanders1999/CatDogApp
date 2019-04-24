@@ -16,6 +16,8 @@ def user_analysis(screen_name):
     # Lists of sentiment scores per each tweet
     final_cat_scores = []
     final_dog_scores = []
+    num_cat_tweets = 0
+    num_dog_tweets = 0
 
     for tweet in user_tweets:
         if any(name in tweet.lower() for name in cat_names) and \
@@ -27,10 +29,12 @@ def user_analysis(screen_name):
             break
         elif any(name in tweet.lower() for name in cat_names):
              # Testing: print("Cat: ",tweet)
+             num_cat_tweets += 1
              blob = TextBlob(tweet)
              final_cat_scores.append(blob.sentiment.polarity)
         elif any(name in tweet.lower() for name in dog_names):
             # Testing: print("Dog: ",tweet)
+            num_dog_tweets += 1
             blob = TextBlob(tweet)
             final_dog_scores.append(blob.sentiment.polarity)
 
@@ -41,4 +45,5 @@ def user_analysis(screen_name):
     # Testing
     # print("Final dog score: ", dog_sa_score)
     # print("Final cat score: ", cat_sa_score)
-    return ((cat_sa_score, dog_sa_score))
+
+    return ((cat_sa_score, num_cat_tweets), (dog_sa_score, num_dog_tweets))
