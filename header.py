@@ -18,6 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import os
+from watson_developer_cloud import VisualRecognitionV3
 
 ###############################################################################
 ###############################################################################
