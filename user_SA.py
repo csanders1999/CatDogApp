@@ -5,7 +5,7 @@ from personalityAnalysisDemo import *
 
 twitter_api = oauth_login()
 personality_insights = ibm_login()
-visual_recognition = VisualRecognitionV3(myVersion, iam_apikey=myIam_apikey)
+visual_recognition = VisualRecognitionV3(myVersion2, iam_apikey=myIam_apikey2)
 
 def user_analysis(screen_name):
     user_tweets = harvest_user_timeline(twitter_api, screen_name)
@@ -94,7 +94,9 @@ def user_analysis(screen_name):
     num_dog_tweets = 0
 
     for tweet in user_tweets:
-        #tweet = tweet['text']
+        #print(tweet)
+        tweetOG = tweet
+        tweet = tweet['text']
         tweetSimple = tweet.lower()
         PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ _-"
         tweetSimple = "".join(c for c in tweetSimple if c in PERMITTED_CHARS)
@@ -119,29 +121,40 @@ def user_analysis(screen_name):
             final_dog_scores.append(blob.sentiment.polarity)
             print(blob.sentiment.polarity)
 
-        for url in re.findall("(?P<url>https?://[^\s]+)", tweet):
-            # print(url)
-            # url = url.group("url") # grabs URL
-            print("Found URL, attempting to classify possible image...")
-            try:
-                classes_result = visual_recognition.classify(url=url).get_result() # classifies image
+        try:
+            #print(tweetOG)
+            mediaList = tweetOG['entities']['media']
+            #print(mediaList)
+            mediaURLs = []
+            for dict in mediaList:
+                mediaURLs.append(dict['media_url'])
+            for url in mediaURLs:
+                # print(url)
+                # url = url.group("url") # grabs URL
+                print("Found URL, attempting to classify possible image...", url)
+                try:
+                    classes_result = visual_recognition.classify(url=url).get_result() # classifies image
 
-                # Gets json data
-                classify_data = json.dumps(classes_result["images"][0]["classifiers"][0]["classes"], indent=2)
+                    # Gets json data
+                    classify_data = json.dumps(classes_result["images"][0]["classifiers"][0]["classes"], indent=2)
 
-                # Going through every dictionary in list of json date
-                for dict in json.loads(classify_data):
-                    for key, value in dict.items():
-                        if value == 'dog':
-                            dog_images += 1
-                            print("URL was a DOG image")
-                            break # won't account for both dog or cat (whichever is bigger)
-                        if value == 'cat':
-                            cat_images += 1
-                            print("URL was a CAT image")
-                            break # won't account for both dog or cat (whichever is bigger)
-            except:
-                print("Not a valid image URL")
+                    # Going through every dictionary in list of json date
+                    for dict in json.loads(classify_data):
+                        for key, value in dict.items():
+                            # print(key, " ", value)
+                            if value == 'dog':
+                                dog_images += 1
+                                print("URL was a DOG image")
+                                break # won't account for both dog or cat (whichever is bigger)
+                            if value == 'cat':
+                                cat_images += 1
+                                print("URL was a CAT image")
+                                break # won't account for both dog or cat (whichever is bigger)
+                except Exception as ex:
+                    # print("Not a valid image URL")
+                    print(ex)
+        except:
+            pass
 
     # Sum of sentiment scores for all tweets containing cat or dog classifiers
     cat_sa_score = sum(final_cat_scores)
