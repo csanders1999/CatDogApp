@@ -4,10 +4,50 @@
   </div>
   <div class='row'>
     <div class='col'>
-      Out of {{analysis.dog_num}} tweets about dogs, the total sentiment polarity is {{analysis.dog_sa_score}}
+      Out of <b>{{analysis.dog_num}}</b> tweets about dogs, the total sentiment polarity is <b>{{analysis.dog_sa_score}}</b>
     </div>
     <div class='col'>
-        Out of {{analysis.cat_num}} tweets about cats, the total sentiment polarity is {{analysis.cat_sa_score}}
+        Out of <b>{{analysis.cat_num}}</b> tweets about cats, the total sentiment polarity is <b>{{analysis.cat_sa_score}}</b>
       </div>
+  </div>
+  <div class='row' style='margin: 50px 20px'>
+    <div class='col'>
+      <b>number</b> pictures of dogs were posted
+    </div>
+    <div class='col'>
+      <b>number</b> pictures of cats were posted
+    </div>
+  </div>
+  <div class='row'>
+      <div class='chart-container' style='height: 550px; width: 85vw; margin: auto'>
+        <canvas id='personalityChart' height='400' width='400'></canvas>
+      </div>
+  </div>
+  <div class='row' style='font-weight: bold'>
+    <div class='col'>
+      Dog lover's personality
+    </div>
+    <div class='col'>
+      {{analysis.username}}'s personality
+    </div>
+    <div class='col'>
+      Cat lover's personality
+    </div>
+  </div>
+  <div *ngFor='let attribute of attributes'>
+    <div class='row'>
+      <div style='margin: 5px auto'><u>{{attribute}}:</u></div>
+    </div>
+    <div class='row'>
+      <div class='col'>
+        {{analysis.cat_dog_personality[attribute][0]}}
+      </div>
+      <div class='col'>
+        {{analysis.personality[attribute]}}
+      </div>
+      <div class='col'>
+        {{analysis.cat_dog_personality[attribute][1]}}
+      </div> 
+    </div>
   </div>
 </div>

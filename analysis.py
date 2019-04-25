@@ -14,12 +14,17 @@ def main():
     #get our data as an array from read_in()
     lines = json.loads(sys.argv[1])
 
-    cat_info, dog_info = user_analysis(lines['username'])
+    cat_info, dog_info, personality = user_analysis(lines['username'])
+    with open('./research/research_data.csv', mode='r') as infile:
+        reader = csv.reader(infile)
+        cat_dog_personality = { rows[0]: (rows[1], rows[2]) for rows in reader }
 
     lines['cat_sa_score'] = cat_info[0]
     lines['cat_num'] = cat_info[1]
     lines['dog_sa_score'] = dog_info[0]
     lines['dog_num'] = dog_info[1]
+    lines['personality'] = personality
+    lines['cat_dog_personality'] = cat_dog_personality
 
     print(1111)
 
