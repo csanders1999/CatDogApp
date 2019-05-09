@@ -2,6 +2,17 @@
   <div class='row' style='display: initial !important; text-align: center;'>
     <h4>Analysis for {{analysis.username}}</h4>
   </div>
+  <div class='row' style='display: initial !important; text-align: center;'>
+    <h6>We think you are a <b>{{catScore >= dogScore ? 'CAT' : 'DOG'}}</b> person!</h6>
+  </div>
+  <div class='row'>
+    <div class='col'>
+      <u>Final dog score: {{dogScore | number : '1.4-4'}}</u>
+    </div>
+    <div class='col'>
+      <u>Final cat score: {{catScore | number: '1.4-4'}}</u>
+    </div>
+  </div>
   <div class='row'>
     <div class='col'>
       Out of <b>{{analysis.dog_num}}</b> tweets about dogs, the total sentiment polarity is <b>{{analysis.dog_sa_score}}</b>
@@ -12,10 +23,10 @@
   </div>
   <div class='row' style='margin: 50px 20px'>
     <div class='col'>
-      <b>number</b> pictures of dogs were posted
+      <b>{{analysis.dog_img_num}}</b> pictures of dogs were posted
     </div>
     <div class='col'>
-      <b>number</b> pictures of cats were posted
+      <b>{{analysis.cat_img_num}}</b> pictures of cats were posted
     </div>
   </div>
   <div class='row'>

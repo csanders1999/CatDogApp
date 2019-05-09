@@ -16,6 +16,6 @@ export class HttpService {
 
   // Send username to node and wait for analysis to be sent back to observable
   postUsername(username: string): Observable<any> {
-    return this.http.post('/user', JSON.stringify({ user: username }), this.httpOptions)
+    return this.http.post('http://localhost:4000/user', JSON.stringify({ user: username }), this.httpOptions)
   }
 }

@@ -93,7 +93,7 @@ def user_analysis(screen_name):
     num_cat_tweets = 0
     num_dog_tweets = 0
 
-    for tweet in user_tweets:
+    for i, tweet in enumerate(user_tweets):
         #print(tweet)
         tweetOG = tweet
         tweet = tweet['text']
@@ -121,40 +121,41 @@ def user_analysis(screen_name):
             final_dog_scores.append(blob.sentiment.polarity)
             print(blob.sentiment.polarity)
 
-        try:
-            #print(tweetOG)
-            mediaList = tweetOG['entities']['media']
-            #print(mediaList)
-            mediaURLs = []
-            for dict in mediaList:
-                mediaURLs.append(dict['media_url'])
-            for url in mediaURLs:
-                # print(url)
-                # url = url.group("url") # grabs URL
-                print("Found URL, attempting to classify possible image...", url)
-                try:
-                    classes_result = visual_recognition.classify(url=url).get_result() # classifies image
+        if i < 100:
+            try:
+                #print(tweetOG)
+                mediaList = tweetOG['entities']['media']
+                #print(mediaList)
+                mediaURLs = []
+                for dict in mediaList:
+                    mediaURLs.append(dict['media_url'])
+                for url in mediaURLs:
+                    # print(url)
+                    # url = url.group("url") # grabs URL
+                    print("Found URL, attempting to classify possible image...", url)
+                    try:
+                        classes_result = visual_recognition.classify(url=url).get_result() # classifies image
 
-                    # Gets json data
-                    classify_data = json.dumps(classes_result["images"][0]["classifiers"][0]["classes"], indent=2)
+                        # Gets json data
+                        classify_data = json.dumps(classes_result["images"][0]["classifiers"][0]["classes"], indent=2)
 
-                    # Going through every dictionary in list of json date
-                    for dict in json.loads(classify_data):
-                        for key, value in dict.items():
-                            # print(key, " ", value)
-                            if value == 'dog':
-                                dog_images += 1
-                                print("URL was a DOG image")
-                                break # won't account for both dog or cat (whichever is bigger)
-                            if value == 'cat':
-                                cat_images += 1
-                                print("URL was a CAT image")
-                                break # won't account for both dog or cat (whichever is bigger)
-                except Exception as ex:
-                    # print("Not a valid image URL")
-                    print(ex)
-        except:
-            pass
+                        # Going through every dictionary in list of json date
+                        for dict in json.loads(classify_data):
+                            for key, value in dict.items():
+                                # print(key, " ", value)
+                                if value == 'dog':
+                                    dog_images += 1
+                                    print("URL was a DOG image")
+                                    break # won't account for both dog or cat (whichever is bigger)
+                                if value == 'cat':
+                                    cat_images += 1
+                                    print("URL was a CAT image")
+                                    break # won't account for both dog or cat (whichever is bigger)
+                    except Exception as ex:
+                        # print("Not a valid image URL")
+                        print(ex)
+            except:
+                pass
 
     # Sum of sentiment scores for all tweets containing cat or dog classifiers
     cat_sa_score = sum(final_cat_scores)
@@ -173,79 +174,82 @@ def user_analysis(screen_name):
     with open('./profile.json', 'w') as fp:
         json.dump(tweets, fp, indent=2)
 
-    with open(join(dirname(__file__), './profile.json')) as profile_json:
-        profile = personality_insights.profile(
-            profile_json.read(),
-            'application/json',
-            content_type='application/json',
-            consumption_preferences=True,
-            raw_scores=True
-        ).get_result()
+    try:
+        with open(join(dirname(__file__), './profile.json')) as profile_json:
+            profile = personality_insights.profile(
+                profile_json.read(),
+                'application/json',
+                content_type='application/json',
+                consumption_preferences=True,
+                raw_scores=True
+            ).get_result()
 
-    research_user['big5_openness'] += profile['personality'][0]['raw_score']
-    research_user['adventurousness'] += profile['personality'][0]['children'][0]['raw_score']
-    research_user['art_interest'] += profile['personality'][0]['children'][1]['raw_score']
-    research_user['emotionality'] += profile['personality'][0]['children'][2]['raw_score']
-    research_user['imagination'] += profile['personality'][0]['children'][3]['raw_score']
-    research_user['intellect'] += profile['personality'][0]['children'][4]['raw_score']
-    research_user['auth_challenge'] += profile['personality'][0]['children'][5]['raw_score']
+        research_user['big5_openness'] += profile['personality'][0]['raw_score']
+        research_user['adventurousness'] += profile['personality'][0]['children'][0]['raw_score']
+        research_user['art_interest'] += profile['personality'][0]['children'][1]['raw_score']
+        research_user['emotionality'] += profile['personality'][0]['children'][2]['raw_score']
+        research_user['imagination'] += profile['personality'][0]['children'][3]['raw_score']
+        research_user['intellect'] += profile['personality'][0]['children'][4]['raw_score']
+        research_user['auth_challenge'] += profile['personality'][0]['children'][5]['raw_score']
 
-    research_user['big5_conscientiousness'] += profile['personality'][1]['raw_score']
-    research_user['achieve_strive'] += profile['personality'][1]['children'][0]['raw_score']
-    research_user['cautiousness'] += profile['personality'][1]['children'][1]['raw_score']
-    research_user['dutifulness'] += profile['personality'][1]['children'][2]['raw_score']
-    research_user['orderliness'] += profile['personality'][1]['children'][3]['raw_score']
-    research_user['self_discip'] += profile['personality'][1]['children'][4]['raw_score']
-    research_user['self_effic'] += profile['personality'][1]['children'][5]['raw_score']
+        research_user['big5_conscientiousness'] += profile['personality'][1]['raw_score']
+        research_user['achieve_strive'] += profile['personality'][1]['children'][0]['raw_score']
+        research_user['cautiousness'] += profile['personality'][1]['children'][1]['raw_score']
+        research_user['dutifulness'] += profile['personality'][1]['children'][2]['raw_score']
+        research_user['orderliness'] += profile['personality'][1]['children'][3]['raw_score']
+        research_user['self_discip'] += profile['personality'][1]['children'][4]['raw_score']
+        research_user['self_effic'] += profile['personality'][1]['children'][5]['raw_score']
 
-    research_user['big5_extraversion'] += profile['personality'][2]['raw_score']
-    research_user['act_level'] += profile['personality'][2]['children'][0]['raw_score']
-    research_user['assertiveness'] += profile['personality'][2]['children'][1]['raw_score']
-    research_user['cheerfulness'] += profile['personality'][2]['children'][2]['raw_score']
-    research_user['excite_seek'] += profile['personality'][2]['children'][3]['raw_score']
-    research_user['outgoing'] += profile['personality'][2]['children'][4]['raw_score']
-    research_user['gregariousness'] += profile['personality'][2]['children'][5]['raw_score']
+        research_user['big5_extraversion'] += profile['personality'][2]['raw_score']
+        research_user['act_level'] += profile['personality'][2]['children'][0]['raw_score']
+        research_user['assertiveness'] += profile['personality'][2]['children'][1]['raw_score']
+        research_user['cheerfulness'] += profile['personality'][2]['children'][2]['raw_score']
+        research_user['excite_seek'] += profile['personality'][2]['children'][3]['raw_score']
+        research_user['outgoing'] += profile['personality'][2]['children'][4]['raw_score']
+        research_user['gregariousness'] += profile['personality'][2]['children'][5]['raw_score']
 
-    research_user['big5_agreeableness'] += profile['personality'][3]['raw_score']
-    research_user['altruism'] += profile['personality'][3]['children'][0]['raw_score']
-    research_user['coop'] += profile['personality'][3]['children'][1]['raw_score']
-    research_user['modesty'] += profile['personality'][3]['children'][2]['raw_score']
-    research_user['uncompromising'] += profile['personality'][3]['children'][3]['raw_score']
-    research_user['sympathy'] += profile['personality'][3]['children'][4]['raw_score']
-    research_user['trust'] += profile['personality'][3]['children'][5]['raw_score']
+        research_user['big5_agreeableness'] += profile['personality'][3]['raw_score']
+        research_user['altruism'] += profile['personality'][3]['children'][0]['raw_score']
+        research_user['coop'] += profile['personality'][3]['children'][1]['raw_score']
+        research_user['modesty'] += profile['personality'][3]['children'][2]['raw_score']
+        research_user['uncompromising'] += profile['personality'][3]['children'][3]['raw_score']
+        research_user['sympathy'] += profile['personality'][3]['children'][4]['raw_score']
+        research_user['trust'] += profile['personality'][3]['children'][5]['raw_score']
 
-    research_user['big5_emotional_range'] += profile['personality'][4]['raw_score']
-    research_user['fiery'] += profile['personality'][4]['children'][0]['raw_score']
-    research_user['worry_prone'] += profile['personality'][4]['children'][0]['raw_score']
-    research_user['melancholy'] += profile['personality'][4]['children'][0]['raw_score']
-    research_user['immoderation'] += profile['personality'][4]['children'][0]['raw_score']
-    research_user['self_consc'] += profile['personality'][4]['children'][0]['raw_score']
-    research_user['stress_prone'] += profile['personality'][4]['children'][0]['raw_score']
+        research_user['big5_emotional_range'] += profile['personality'][4]['raw_score']
+        research_user['fiery'] += profile['personality'][4]['children'][0]['raw_score']
+        research_user['worry_prone'] += profile['personality'][4]['children'][0]['raw_score']
+        research_user['melancholy'] += profile['personality'][4]['children'][0]['raw_score']
+        research_user['immoderation'] += profile['personality'][4]['children'][0]['raw_score']
+        research_user['self_consc'] += profile['personality'][4]['children'][0]['raw_score']
+        research_user['stress_prone'] += profile['personality'][4]['children'][0]['raw_score']
 
-    research_user['clothing_qual'] += profile['consumption_preferences'][0]['consumption_preferences'][2]['score']
-    research_user['clothing_style'] += profile['consumption_preferences'][0]['consumption_preferences'][3]['score']
-    research_user['clothing_comf'] += profile['consumption_preferences'][0]['consumption_preferences'][4]['score']
-    research_user['clothing_brand'] += profile['consumption_preferences'][0]['consumption_preferences'][5]['score']
-    research_user['clothing_ads'] += profile['consumption_preferences'][0]['consumption_preferences'][7]['score']
-    research_user['clothing_socmed'] += profile['consumption_preferences'][0]['consumption_preferences'][8]['score']
-    research_user['clothing_fam'] += profile['consumption_preferences'][0]['consumption_preferences'][9]['score']
-    research_user['clothing_spur'] += profile['consumption_preferences'][0]['consumption_preferences'][10]['score']
+        research_user['clothing_qual'] += profile['consumption_preferences'][0]['consumption_preferences'][2]['score']
+        research_user['clothing_style'] += profile['consumption_preferences'][0]['consumption_preferences'][3]['score']
+        research_user['clothing_comf'] += profile['consumption_preferences'][0]['consumption_preferences'][4]['score']
+        research_user['clothing_brand'] += profile['consumption_preferences'][0]['consumption_preferences'][5]['score']
+        research_user['clothing_ads'] += profile['consumption_preferences'][0]['consumption_preferences'][7]['score']
+        research_user['clothing_socmed'] += profile['consumption_preferences'][0]['consumption_preferences'][8]['score']
+        research_user['clothing_fam'] += profile['consumption_preferences'][0]['consumption_preferences'][9]['score']
+        research_user['clothing_spur'] += profile['consumption_preferences'][0]['consumption_preferences'][10]['score']
 
-    research_user['health_eat'] += profile['consumption_preferences'][1]['consumption_preferences'][0]['score']
-    research_user['health_gym'] += profile['consumption_preferences'][1]['consumption_preferences'][1]['score']
-    research_user['health_outdoor'] += profile['consumption_preferences'][1]['consumption_preferences'][2]['score']
+        research_user['health_eat'] += profile['consumption_preferences'][1]['consumption_preferences'][0]['score']
+        research_user['health_gym'] += profile['consumption_preferences'][1]['consumption_preferences'][1]['score']
+        research_user['health_outdoor'] += profile['consumption_preferences'][1]['consumption_preferences'][2]['score']
 
-    research_user['enviro_care'] += profile['consumption_preferences'][2]['consumption_preferences'][0]['score']
+        research_user['enviro_care'] += profile['consumption_preferences'][2]['consumption_preferences'][0]['score']
 
-    research_user['movie_romance'] += profile['consumption_preferences'][4]['consumption_preferences'][0]['score']
-    research_user['movie_adventure'] += profile['consumption_preferences'][4]['consumption_preferences'][1]['score']
-    research_user['movie_horror'] += profile['consumption_preferences'][4]['consumption_preferences'][2]['score']
-    research_user['movie_musical'] += profile['consumption_preferences'][4]['consumption_preferences'][3]['score']
-    research_user['movie_historical'] += profile['consumption_preferences'][4]['consumption_preferences'][4]['score']
-    research_user['movie_scifi'] += profile['consumption_preferences'][4]['consumption_preferences'][5]['score']
-    research_user['movie_war'] += profile['consumption_preferences'][4]['consumption_preferences'][6]['score']
-    research_user['movie_drama'] += profile['consumption_preferences'][4]['consumption_preferences'][7]['score']
-    research_user['movie_action'] += profile['consumption_preferences'][4]['consumption_preferences'][8]['score']
-    research_user['movie_document'] += profile['consumption_preferences'][4]['consumption_preferences'][9]['score']
+        research_user['movie_romance'] += profile['consumption_preferences'][4]['consumption_preferences'][0]['score']
+        research_user['movie_adventure'] += profile['consumption_preferences'][4]['consumption_preferences'][1]['score']
+        research_user['movie_horror'] += profile['consumption_preferences'][4]['consumption_preferences'][2]['score']
+        research_user['movie_musical'] += profile['consumption_preferences'][4]['consumption_preferences'][3]['score']
+        research_user['movie_historical'] += profile['consumption_preferences'][4]['consumption_preferences'][4]['score']
+        research_user['movie_scifi'] += profile['consumption_preferences'][4]['consumption_preferences'][5]['score']
+        research_user['movie_war'] += profile['consumption_preferences'][4]['consumption_preferences'][6]['score']
+        research_user['movie_drama'] += profile['consumption_preferences'][4]['consumption_preferences'][7]['score']
+        research_user['movie_action'] += profile['consumption_preferences'][4]['consumption_preferences'][8]['score']
+        research_user['movie_document'] += profile['consumption_preferences'][4]['consumption_preferences'][9]['score']
+    except:
+        pass
 
     return ((cat_sa_score, num_cat_tweets, cat_images), (dog_sa_score, num_dog_tweets, dog_images), research_user)
